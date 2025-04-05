@@ -53,8 +53,8 @@ pipeline {
         stage('Containerization') {
             steps {
                 sh '''
-                    docker stop c1 || true
-                    docker rm c1 || true
+                    docker stop c3 || true
+                    docker rm c3 || true
                     docker run -it -d --name c3 -p 9003:8080 amith1777/java-ci:1
                 '''
             }
