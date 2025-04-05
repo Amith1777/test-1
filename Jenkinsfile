@@ -15,13 +15,13 @@ pipeline {
 
         stage('Compile') {
             steps {
-                sh "mvn compile"
+                sh 'mvn compile'
             }
         }
 
         stage('Build') {
             steps {
-                sh "mvn clean install"
+                sh 'mvn clean install'
             }
         }
 
@@ -31,8 +31,8 @@ pipeline {
                     sh """
                         mvn clean verify sonar:sonar \
                         -Dsonar.projectKey=test-1 \
-                        -Dsonar.host.url=http://16.16.233.229:9000 \
-                        -Dsonar.login=$SONAR_AUTH_TOKEN
+                        -Dsonar.login=$SONAR_AUTH_TOKEN \
+                        -Dsonar.host.url=http://16.16.233.229:9000
                     """
                 }
             }
@@ -40,38 +40,37 @@ pipeline {
 
         stage('Build and Tag Image') {
             steps {
-                sh "docker build -t amith1777/java-ci-project-image:1 ."
+                sh 'docker build -t amith1777/java-ci:1 .'
             }
         }
 
         stage('Docker Image Scan') {
             steps {
-                sh "docker images" // optional for debugging
-                sh "trivy image --format table -o trivy-image-report.html amith1777/java-ci-project-image:1"
+                sh 'trivy image --format table -o trivy-image-report.html amith1777/java-ci:1'
             }
         }
 
         stage('Containerization') {
             steps {
-                sh """
+                sh '''
                     docker stop c1 || true
                     docker rm c1 || true
-                    docker run -it -d --name c1 -p 9001:8080 amith1777/java-ci-project-image:1
-                """
+                    docker run -it -d --name c1 -p 9001:8080 amith1777/java-ci:1
+                '''
             }
         }
 
         stage('Login to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'Jenkins-DockerHub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
+                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
                 }
             }
         }
 
         stage('Push Image to Repository') {
             steps {
-                sh "docker push amith1777/java-ci-project-image:1"
+                sh 'docker push amith1777/java-ci:1'
             }
         }
     }
