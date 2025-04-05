@@ -29,9 +29,10 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'sonar-jenkins', variable: 'SONAR_AUTH_TOKEN')]) {
                     sh """
-                        mvn sonar:sonar \
-                        -Dsonar.login=$SONAR_AUTH_TOKEN \
-                        -Dsonar.host.url=http://16.16.233.229:9000/
+                        mvn clean verify sonar:sonar \
+                        -Dsonar.projectKey=test-1 \
+                        -Dsonar.host.url=http://16.16.233.229:9000 \
+                        -Dsonar.login=$SONAR_AUTH_TOKEN
                     """
                 }
             }
@@ -45,6 +46,7 @@ pipeline {
 
         stage('Docker Image Scan') {
             steps {
+                sh "docker images" // optional for debugging
                 sh "trivy image --format table -o trivy-image-report.html amith1777/java-ci-project-image:1"
             }
         }
