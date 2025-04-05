@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -7,7 +8,7 @@ pipeline {
     }
 
     stages {
-        stage('Git Checkout') {
+        stage('Git checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/Amith1777/test-1.git'
             }
@@ -15,62 +16,59 @@ pipeline {
 
         stage('Compile') {
             steps {
-                sh 'mvn compile'
+                sh "mvn compile"
             }
         }
 
         stage('Build') {
             steps {
-                sh 'mvn clean install'
+                sh "mvn clean install"
             }
         }
 
-        stage('Code Scan') {
+        stage('codescan') {
             steps {
                 withCredentials([string(credentialsId: 'sonar-jenkins', variable: 'SONAR_AUTH_TOKEN')]) {
-                    sh """
-                        mvn clean verify sonar:sonar \
-                        -Dsonar.projectKey=test-1 \
-                        -Dsonar.login=$SONAR_AUTH_TOKEN \
-                        -Dsonar.host.url=http://16.16.233.229:9000
-                    """
+                    sh "mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=http://13.48.137.45:9000/"
                 }
             }
         }
 
-        stage('Build and Tag Image') {
+        stage('Build and tag') {
             steps {
-                sh 'docker build -t amith1777/java-ci:1 .'
+                sh "docker build -t Amith1777/java-ci:1 ."
             }
         }
 
-        stage('Docker Image Scan') {
+        stage('Docker image scan') {
             steps {
-                sh 'trivy image --format table -o trivy-image-report.html amith1777/java-ci:1'
+                sh "trivy image --format table -o trivy-image-report.html Amith1777/java-ci:1"
             }
         }
 
-        stage('Containerization') {
+        stage('Containersation') {
             steps {
                 sh '''
                     docker stop c3 || true
                     docker rm c3 || true
-                    docker run -it -d --name c3 -p 9003:8080 amith1777/java-ci:1
+                    docker run -it -d --name c3 -p 9004:8080 Amith1777/java-ci:1
                 '''
             }
         }
 
         stage('Login to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'Jenkins-DockerHub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'Jenkins-DockerHub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
+                    }
                 }
             }
         }
 
-        stage('Push Image to Repository') {
+        stage('Pushing image to repository') {
             steps {
-                sh 'docker push amith1777/java-ci:1'
+                sh 'docker push Amith1777/java-ci:1'
             }
         }
     }
