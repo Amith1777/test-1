@@ -77,7 +77,7 @@ pipeline {
 
         stage('Push Image to Repository') {
             steps {
-                sh 'docker push amith1777/java-ci:1'
+                sh 'docker push amith2774/java-ci:1'
             }
         }
     }
