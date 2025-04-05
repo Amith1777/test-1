@@ -55,7 +55,7 @@ pipeline {
                 sh '''
                     docker stop c1 || true
                     docker rm c1 || true
-                    docker run -it -d --name c1 -p 9001:8080 amith1777/java-ci:1
+                    docker run -it -d --name c3 -p 9003:8080 amith1777/java-ci:1
                 '''
             }
         }
