@@ -45,22 +45,22 @@ pipeline {
 
         stage('Build and Tag Image') {
             steps {
-                sh 'docker build -t amith2774/java-ci:1 .'
+                sh 'docker build -t amith2774/webapp:1 .'
             }
         }
 
         stage('Docker Image Scan') {
             steps {
-                sh 'trivy image --format table -o trivy-image-report.html amith2774/java-ci:1'
+                sh 'trivy image --format table -o trivy-image-report.html amith2774/webapp:1'
             }
         }
 
         stage('Containerization') {
             steps {
                 sh '''
-                    docker stop c3 || true
-                    docker rm c3 || true
-                    docker run -it -d --name c3 -p 9004:8080 amith2774/java-ci:1
+                    docker stop c4 || true
+                    docker rm c4 || true
+                    docker run -it -d --name c4 -p 9005:8080 amith2774/webapp:1
                 '''
             }
         }
@@ -77,7 +77,7 @@ pipeline {
 
         stage('Push Image to Repository') {
             steps {
-                sh 'docker push amith2774/java-ci:1'
+                sh 'docker push amith2774/webapp:1'
             }
         }
     }
